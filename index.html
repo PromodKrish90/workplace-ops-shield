@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Workplace Ops Shield Agent</title>
+<meta name="description" content="Interactive walkthrough: how the Workplace Ops Shield Agent applies policy, approval, verified execution and audit to identity &amp; directory, endpoint management &amp; compliance, and virtual workspace &amp; session operations.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: operations console. Scenario switch on top, six-stage pipeline on the left, a live decision record on the right, shared controls below. Dark-first. */
+:root{
+  --bg:#08131f; --surface:#0e1d2e; --surface-2:#132840; --line:#23405c; --line-soft:#1a3149;
+  --fg:#e8f1fb; --muted:#9fb3c9; --faint:#7389a2;
+  --accent:#4fd1f5; --accent-ink:#04121d;
+  --ok:#5bd8a6; --wait:#f5c26b; --bad:#ff8496;
+  --ok-bg:#123d35; --wait-bg:#3f3420; --bad-bg:#47202c; --accent-bg:#123a4f;
+  --glow:#1b4566;
+  --f-display:"Archivo","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#f3f6fa; --surface:#ffffff; --surface-2:#eaf1f8; --line:#c9d6e4; --line-soft:#dfe7f0;
+  --fg:#0d1b2a; --muted:#4a5d73; --faint:#5f7189;
+  --accent:#0a78a8; --accent-ink:#ffffff;
+  --ok:#137a52; --wait:#8a5a00; --bad:#b4233c;
+  --ok-bg:#ddf3ea; --wait-bg:#fbefd6; --bad-bg:#fbe1e6; --accent-bg:#ddf0f8;
+  --glow:#d6e8f6; color-scheme:light;
+}}
+:root[data-theme="light"]{
+  --bg:#f3f6fa; --surface:#ffffff; --surface-2:#eaf1f8; --line:#c9d6e4; --line-soft:#dfe7f0;
+  --fg:#0d1b2a; --muted:#4a5d73; --faint:#5f7189;
+  --accent:#0a78a8; --accent-ink:#ffffff;
+  --ok:#137a52; --wait:#8a5a00; --bad:#b4233c;
+  --ok-bg:#ddf3ea; --wait-bg:#fbefd6; --bad-bg:#fbe1e6; --accent-bg:#ddf0f8;
+  --glow:#d6e8f6; color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);background-image:radial-gradient(ellipse 90% 50% at 50% -10%,var(--glow),transparent 70%);background-repeat:no-repeat;color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1140px;margin:0 auto;padding-inline:20px;padding-block:36px 48px;display:grid;gap:28px}
+.mono{font-family:var(--f-mono)}
+.eyebrow{font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+
+/* hero */
+.hero{display:grid;gap:14px;max-width:820px}
+.hero-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.demo-chip{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:4px 8px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(34px,5.4vw,56px);line-height:1.02;letter-spacing:-.025em;margin:0;text-wrap:balance}
+h1 span{display:block;color:var(--muted);font-weight:500;font-size:.5em;letter-spacing:-.01em;margin-top:10px}
+.thesis{font-family:var(--f-display);font-weight:700;font-size:clamp(18px,2.2vw,22px);line-height:1.3;margin:4px 0 0;text-wrap:balance;border-left:3px solid var(--accent);padding-left:14px}
+.intro{color:var(--muted);margin:0;max-width:68ch}
+
+/* scenario switch + controls */
+.bar{display:grid;gap:14px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.tab{font:inherit;text-align:left;cursor:pointer;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:3px;min-width:0}
+.tab b{font-family:var(--f-display);font-weight:700;font-size:15px}
+.tab small{color:var(--faint);font-size:12px;line-height:1.35}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--accent-bg);border-color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent)}
+.tab.unsafe[aria-selected="true"]{background:var(--bad-bg);border-color:var(--bad);box-shadow:inset 0 -3px 0 var(--bad)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button.btn{font:inherit;font-weight:600;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);padding:10px 16px}
+button.btn:hover{border-color:var(--accent)}
+button.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.status{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.progress{height:4px;background:var(--line-soft);border-radius:4px;overflow:hidden}
+.progress span{display:block;height:100%;width:0;background:var(--accent);transition:width .35s ease}
+.progress.unsafe span{background:var(--bad)}
+
+/* scope strip */
+.scope{display:grid;gap:8px}
+.scope .lbl{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.scope ul{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0;padding:0}
+.scope li{list-style:none;font-size:13px;line-height:1.45;border-left:2px solid var(--accent);padding:2px 0 2px 12px;color:var(--muted);min-width:0}
+.scope.unsafe li{border-left-color:var(--bad)}
+
+/* main layout */
+.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:18px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+.panel-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 16px}
+.panel-h h2{font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0}
+.panel-h span{font-family:var(--f-mono);font-size:11px;color:var(--faint)}
+
+.pipeline{display:grid;gap:0;margin:0;padding:0;list-style:none;counter-reset:s}
+.stage{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;padding-bottom:14px}
+.stage:last-child{padding-bottom:0}
+.stage::before{content:"";position:absolute;left:16px;top:34px;bottom:0;width:2px;background:var(--line-soft)}
+.stage:last-child::before{display:none}
+.stage.done::before{background:var(--ok)}
+.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:12px;font-weight:600;background:var(--surface-2);color:var(--muted);border:2px solid var(--line);position:relative;z-index:1}
+.stage.done .dot{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.stage.active .dot{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.stage.wait .dot{background:var(--wait-bg);color:var(--wait);border-color:var(--wait)}
+.stage.fail .dot{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.stage.skip .dot{border-style:dashed}
+.stage-btn{font:inherit;text-align:left;cursor:pointer;background:transparent;color:inherit;border:1px solid transparent;border-radius:10px;padding:6px 10px;margin:-6px -10px;min-width:0;display:grid;gap:3px}
+.stage-btn:hover{background:var(--surface-2)}
+.stage.active .stage-btn{background:var(--surface-2);border-color:var(--line)}
+.stage-btn strong{font-family:var(--f-display);font-weight:700;font-size:15px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stage-btn small{color:var(--muted);font-size:13px;line-height:1.45}
+.state{font-family:var(--f-mono);font-size:10.5px;font-weight:600;letter-spacing:.04em;border-radius:5px;padding:2px 6px;background:var(--surface-2);color:var(--faint);border:1px solid var(--line-soft)}
+.stage.done .state{color:var(--ok);background:var(--ok-bg);border-color:transparent}
+.stage.active .state{color:var(--accent);background:var(--accent-bg);border-color:transparent}
+.stage.wait .state{color:var(--wait);background:var(--wait-bg);border-color:transparent}
+.stage.fail .state{color:var(--bad);background:var(--bad-bg);border-color:transparent}
+
+/* detail */
+.detail{display:grid;gap:14px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+.tag{justify-self:start;font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:6px;padding:4px 9px;background:var(--accent-bg);color:var(--accent)}
+.tag.fail{background:var(--bad-bg);color:var(--bad)}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}
+.tag.wait{background:var(--wait-bg);color:var(--wait)}
+.detail h3{font-family:var(--f-display);font-weight:800;font-size:24px;line-height:1.15;margin:0;text-wrap:balance}
+.detail p{margin:0;color:var(--muted)}
+.principle-box{border-top:1px solid var(--line-soft);padding-top:14px;font-size:14px}
+.principle-box b{color:var(--fg)}
+.record{background:var(--bg);border:1px solid var(--line-soft);border-radius:10px;padding:12px;font-family:var(--f-mono);font-size:12px;line-height:1.6;overflow-x:auto;min-height:120px}
+.record .k{color:var(--faint)}
+.record .row{white-space:pre-wrap;overflow-wrap:anywhere}
+.record .ok{color:var(--ok)}.record .bad{color:var(--bad)}.record .wait{color:var(--wait)}.record .acc{color:var(--accent)}
+.record-h{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 -6px}
+.rule{font-size:13px;border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;color:var(--fg);background:var(--surface-2)}
+.rule.unsafe{border-color:var(--bad);background:var(--bad-bg)}
+
+/* shared controls */
+.controls-sec{display:grid;gap:14px}
+.sec-h{display:grid;gap:4px}
+.sec-h h2{font-family:var(--f-display);font-weight:800;font-size:24px;margin:0}
+.sec-h p{margin:0;color:var(--muted);max-width:68ch}
+.ctl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ctl{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:6px;align-content:start;min-width:0}
+.ctl .code{font-family:var(--f-mono);font-size:11px;color:var(--faint);letter-spacing:.06em}
+.ctl b{font-family:var(--f-display);font-weight:700;font-size:16px}
+.ctl span{color:var(--muted);font-size:13.5px;line-height:1.5}
+.ctl.lead{grid-column:1/-1;background:var(--accent-bg);border-color:var(--accent);display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 18px;align-items:center}
+.ctl.lead b{font-size:20px}
+.ctl.lead .code{grid-row:span 2;font-size:13px;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:8px 10px}
+
+.notice{font-size:13px;color:var(--muted);border:1px dashed var(--line);border-radius:10px;padding:12px 14px}
+.notice b{color:var(--fg)}
+
+@media (max-width:860px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .detail{position:static}
+  .tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .scope ul{grid-template-columns:minmax(0,1fr)}
+  .ctl-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:520px){
+  .wrap{padding-inline:16px;padding-block:24px 36px}
+  .tabs{grid-template-columns:minmax(0,1fr)}
+  .tab small{display:none}
+  .ctl-grid{grid-template-columns:minmax(0,1fr)}
+  .ctl.lead{grid-template-columns:minmax(0,1fr)}
+  .ctl.lead .code{grid-row:auto;justify-self:start}
+  .status{margin-left:0;width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-top"><span class="eyebrow">Secure agentic IT operations</span><span class="demo-chip">Interactive demo · not connected to live systems</span></div>
+    <h1>Workplace Ops Shield Agent<span>Secure Agentic IT Operations</span></h1>
+    <p class="thesis">AI can recommend an action. It should not have unrestricted authority to execute it.</p>
+    <p class="intro">Explore policy-governed agentic operations across the enterprise workplace stack: the identity and directory, endpoint management and compliance, and virtual workspace and session control planes. The Shield separates AI reasoning from operational authority: policy determines what is permitted, approval is required where configured, execution is limited to the approved target, and completion is reported only after verification.</p>
+  </header>
+
+  <section class="bar" aria-label="Scenario and playback">
+    <div class="tabs" role="tablist" aria-label="Workflow scenario" id="tabs"></div>
+    <div class="controls">
+      <button class="btn primary" id="play" type="button">▶ Play workflow</button>
+      <button class="btn" id="step" type="button">Step →</button>
+      <button class="btn" id="reset" type="button">↺ Reset</button>
+      <div class="status" id="status" aria-live="polite">Ready · step 0 of 6</div>
+    </div>
+    <div class="progress" id="progressBar" aria-hidden="true"><span id="progress"></span></div>
+    <div class="scope" id="scope"></div>
+  </section>
+
+  <div class="layout">
+    <section class="panel" aria-label="Workflow stages">
+      <div class="panel-h"><h2>Workflow stages</h2><span>select a stage to inspect it</span></div>
+      <ol class="pipeline" id="pipeline"></ol>
+    </section>
+    <aside class="panel detail" aria-live="polite">
+      <div class="tag" id="tag">Ready</div>
+      <h3 id="dTitle"></h3>
+      <p id="dText"></p>
+      <div class="principle-box" id="dControl"></div>
+      <p class="record-h">Decision record (redacted)</p>
+      <div class="record" id="record" role="log"></div>
+      <div class="rule" id="rule"></div>
+    </aside>
+  </div>
+
+  <section class="controls-sec" aria-labelledby="ctlh">
+    <div class="sec-h">
+      <span class="eyebrow">Shared across every scenario</span>
+      <h2 id="ctlh">Shield security controls</h2>
+      <p>The same controls apply whether the request touches a directory object, a managed device or a virtual desktop.</p>
+    </div>
+    <div class="ctl-grid">
+      <div class="ctl lead"><span class="code">ADVISE ≠ AUTHORIZE</span><b>AI advises; policy decides</b><span>AI agents interpret requests and recommend actions. A deterministic policy layer has the final word, and agent output can only make an outcome stricter.</span></div>
+      <div class="ctl"><span class="code">FAIL_CLOSED</span><b>Fail closed</b><span>If an agent times out, returns malformed data, or a request cannot be safely validated, the system does not silently allow execution.</span></div>
+      <div class="ctl"><span class="code">BIND · EXPIRE · ONCE</span><b>Exact-target approval</b><span>Approval is bound to the requester, action, target and parameters. It expires and is single-use. Changed targets, replays and duplicate execution are refused.</span></div>
+      <div class="ctl"><span class="code">READ ≠ WRITE</span><b>Least privilege</b><span>Read and write permissions are separated. Tools and service identities receive only the permissions their assigned operations need.</span></div>
+      <div class="ctl"><span class="code">REDACTED</span><b>Secrets stay out of AI</b><span>Passwords, keys and tokens are never sent to the model or written to chat transcripts and logs. Where a disclosure workflow exists, the secret is revealed once, to the authorized requester only.</span></div>
+      <div class="ctl"><span class="code">VERIFYING → COMPLETED</span><b>Verified execution</b><span>The workflow checks the resulting system state before reporting success. A submitted command or accepted API request is not proof of completion.</span></div>
+      <div class="ctl"><span class="code">AUDIT</span><b>Auditable decisions</b><span>Each operation records the requester, target, operation, policy decision, approval reference, execution result and reason, with secrets and sensitive values redacted.</span></div>
+    </div>
+  </section>
+
+  <p class="notice"><b>Demonstration.</b> This page is a presentation replay. It is not connected to production systems, and the names, IDs and timings shown are illustrative. Actual operations, permissions, approval requirements and verification methods depend on the tools and policies configured in each implementation.</p>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* Each stage: t title, s short line, st state code, kind (done|wait|fail|skip for its finished look),
+   tag, text, ctl (control shown in detail), log (decision record line). */
+const SC = {
+  ad: {
+    tab: "Identity & Directory", sub: "Control plane",
+    scope: ["Context-aware identity and directory operations across user lifecycle, account state and group entitlements", "Governed execution of privileged directory changes, including authorization checks and target-scoped approvals", "Policy-enforced access modifications with post-execution state validation"],
+    rule: "<b>Security principle:</b> separate read permissions from write permissions, apply least privilege, and verify the resulting directory state.",
+    stages: [
+      {t:"Directory request received", s:"Classify read vs write; identify the exact object.", st:"RECEIVED", tag:"Intake",
+       text:"The request is classified as a read or a write operation, and the exact directory object is identified. A request is structured input, not permission to act.",
+       ctl:"<b>Control:</b> the action and the target are explicit before anything sensitive is considered.",
+       log:["request", "op=group_member_add target=user:j.doe group=APP-Finance-RO requester=helpdesk.l2"]},
+      {t:"AI agents build the proposal", s:"Resolve identity, gather context, propose a structured action.", st:"PROPOSED", tag:"AI proposal",
+       text:"The agents resolve the identity, gather directory context and propose a structured action. Ambiguous names or multiple matches are sent back for clarification instead of being guessed.",
+       ctl:"<b>Control:</b> one exact match or a question back to the requester. The agent never picks a match on its own.",
+       log:["agent", "match=1 object=CN=j.doe,OU=Finance proposal=add_member"]},
+      {t:"Check authority and impact", s:"Target, operation, caller permissions, scope and risk.", st:"EVALUATING", tag:"Policy gate",
+       text:"The policy engine validates the target, the requested operation, the caller's permissions, the scope and the risk. A read-only permission never implies write permission.",
+       ctl:"<b>Control:</b> least privilege. Protected and privileged groups are outside the allowed scope.",
+       log:["policy", "decision=REQUIRE_APPROVAL risk=MEDIUM rule=membership-change"], kind:"wait"},
+      {t:"Approval for sensitive changes", s:"Approve the exact account, group or membership change.", st:"APPROVED", tag:"Approval",
+       text:"Where required, approval covers the exact account, group or membership change. It is bound to that request, expires, and cannot override a policy denial.",
+       ctl:"<b>Control:</b> the approval is single-use and target-specific. Changed targets and replays are refused.",
+       log:["approval", "by=ops.approver binding=sha256:9f2c… expires=+10m"]},
+      {t:"Perform the AD operation", s:"Only the approved change, against the approved object.", st:"EXECUTING", tag:"Controlled execution",
+       text:"Only the approved change runs, against the approved object, once. Passwords and tokens stay out of AI prompts and logs.",
+       ctl:"<b>Control:</b> a write-scoped service identity, used only for this operation.",
+       log:["execute", "job=ad-membership status=finished secrets=none"]},
+      {t:"Confirm directory state", s:"Read the object again; record a redacted audit event.", st:"COMPLETED", tag:"Verified result",
+       text:"The affected object is read again to confirm the intended result before completion is reported. A redacted audit event records the decision and outcome.",
+       ctl:"<b>Control:</b> completion means the directory now shows the change.",
+       log:["verify", "re-read memberOf contains APP-Finance-RO → COMPLETED"]}
+    ]
+  },
+  intune: {
+    tab: "Endpoint Management & Compliance", sub: "Control plane",
+    scope: ["Unified device-state assessment across inventory, enrollment, compliance and management signals", "Orchestrated endpoint actions through approved management interfaces", "Policy-gated remediation with execution verification and auditable outcomes"],
+    rule: "<b>Security principle:</b> an accepted API request does not necessarily mean the endpoint action has completed.",
+    stages: [
+      {t:"Endpoint request received", s:"Requester, target device, operation and scope.", st:"RECEIVED", tag:"Intake",
+       text:"The request identifies the requester, the target device, the requested operation and its scope.",
+       ctl:"<b>Control:</b> the action and the device are explicit before anything is considered.",
+       log:["request", "op=device_sync target=LT-0457 requester=endpoint.ops"]},
+      {t:"AI agents interpret the request", s:"Understand intent and gather context.", st:"INVESTIGATING", tag:"AI assessment",
+       text:"The agents work out the intent and gather the relevant context: ownership, compliance state, last check-in. They do not guess device IDs or broaden the request.",
+       ctl:"<b>Control:</b> one device in, one device out. No wildcard or \"all similar devices\".",
+       log:["agent", "device=LT-0457 compliance=noncompliant last_checkin=3d"]},
+      {t:"Validate scope and permissions", s:"Supported operation, least privilege, risk.", st:"EVALUATING", tag:"Policy gate",
+       text:"The policy engine checks the device scope, whether the operation is supported, the least-privilege permissions it needs, and the risk.",
+       ctl:"<b>Control:</b> the service identity holds only the permissions this operation requires.",
+       log:["policy", "decision=ALLOW risk=LOW rule=sync-is-non-disruptive"]},
+      {t:"Approval gate", s:"Explicit approval for sensitive or disruptive actions.", st:"APPROVED", tag:"Approval",
+       text:"Sensitive or disruptive actions such as retire or wipe require explicit approval under policy. A non-disruptive sync is allowed by policy, and the approval is still bound to this device and this action.",
+       ctl:"<b>Control:</b> the approval level follows the impact of the action.",
+       log:["approval", "by=policy binding=sha256:41ae… expires=+10m"]},
+      {t:"Execute controlled action", s:"Only the approved operation, on the approved device.", st:"EXECUTING", tag:"Controlled execution",
+       text:"Only the approved operation is sent, for the approved device. The request being accepted is recorded as a request, not as a result.",
+       ctl:"<b>Control:</b> execute once. A replay or a double click is refused.",
+       log:["execute", "api=syncDevice http=204 meaning=accepted"]},
+      {t:"Verify and audit", s:"Read the device state again before reporting completion.", st:"COMPLETED", tag:"Verified result",
+       text:"The API response is checked and, where needed, the device state is read again before completion is reported. The decision and outcome go to the audit trail.",
+       ctl:"<b>Control:</b> completion means the device checked in, not that the API said 204.",
+       log:["verify", "last_checkin=just now → COMPLETED"]}
+    ]
+  },
+  vdi: {
+    tab: "Virtual Workspace & Session", sub: "Control plane",
+    scope: ["VDI machine health, registration and session-state evaluation", "Context-aware orchestration of authorized session and machine operations", "Controlled recovery workflows with pre-execution validation and post-action verification"],
+    rule: "<b>Security principle:</b> a restart is not successful merely because the command was submitted.",
+    stages: [
+      {t:"VDI request received", s:"Requester, target machine or session, operation.", st:"RECEIVED", tag:"Intake",
+       text:"The request identifies the requester, the target machine or session, and the requested operation.",
+       ctl:"<b>Control:</b> the action and the machine are explicit before anything is considered.",
+       log:["request", "op=vdi_restart target=VDI-FIN-021 requester=desk.ops"]},
+      {t:"AI agents interpret the request", s:"Gather context; prepare a structured proposal.", st:"INVESTIGATING", tag:"AI assessment",
+       text:"The agents read the machine's live state (power, registration, sessions, maintenance mode) and prepare a structured proposal.",
+       ctl:"<b>Control:</b> the evidence is re-read when it is stale, so the decision is not based on old data.",
+       log:["agent", "power=On registered=yes sessions=0 maintenance=off"]},
+      {t:"Policy and impact check", s:"Target, scope, permissions and operational risk.", st:"EVALUATING", tag:"Policy gate",
+       text:"The policy engine validates the target, scope, permissions and operational risk. A machine with a connected user is denied. If an agent times out or returns malformed data, the restart is denied.",
+       ctl:"<b>Control:</b> fail closed. Uncertainty never becomes a restart.",
+       log:["policy", "decision=REQUIRE_APPROVAL risk=MEDIUM rule=every-restart-needs-approval"], kind:"wait"},
+      {t:"Approval gate", s:"Approval for sensitive or disruptive actions.", st:"APPROVED", tag:"Approval",
+       text:"Disruptive actions need approval under the configured policy. An Approval Agent checks the request again on fresh evidence, and the approval is bound to this exact machine.",
+       ctl:"<b>Control:</b> the approval is bound to the target, expires, and is single-use.",
+       log:["approval", "by=approval-agent checks=5/5 binding=sha256:c07d…"]},
+      {t:"Execute approved VDI action", s:"Only the approved operation, on the exact target.", st:"EXECUTING", tag:"Controlled execution",
+       text:"Only the approved operation runs against the exact target. Queuing the restart counts as a request; the workflow waits for the result.",
+       ctl:"<b>Control:</b> execute once. Duplicate restarts of the same machine are refused while one is in progress.",
+       log:["execute", "power_action=Restart state=Completed"]},
+      {t:"Verify and audit", s:"Restarted and registered again before success.", st:"COMPLETED", tag:"Verified result",
+       text:"Success is reported only after the restart completed and the machine registered with the controller again. The decision and result are written to the audit trail.",
+       ctl:"<b>Control:</b> completion means the machine is back and registered.",
+       log:["verify", "registered_after=15s verified=true → COMPLETED"]}
+    ]
+  },
+  unsafe: {
+    tab: "Unsafe request", sub: "Fail-closed path", unsafe: true,
+    scope: ["Ambiguous target or multiple matches", "Agent timeout or malformed answer", "Policy rejection that approval cannot override"],
+    rule: "<b>Security principle:</b> denied means nothing ran.",
+    stages: [
+      {t:"Receive and classify", s:"Identify the requested operation and target.", st:"RECEIVED", tag:"Intake",
+       text:"A request arrives to restart a desktop and reset a password for \"the finance guy\". The operation is classified, but the target is ambiguous.",
+       ctl:"<b>Control:</b> an ambiguous target is never resolved by guessing.",
+       log:["request", "op=vdi_restart,ad_reset target=\"the finance guy\" matches=3"]},
+      {t:"Assess without authority", s:"AI output is not treated as authorization.", st:"EVALUATING", tag:"AI assessment",
+       text:"The agent times out on one check and returns a malformed answer on another. Neither is read as a yes.",
+       ctl:"<b>Control:</b> AI output informs the decision but never grants permission.",
+       log:["agent", "shield=timeout(40s) approval=malformed_json"]},
+      {t:"Deny or escalate", s:"Uncertainty never becomes implicit permission.", st:"DENIED", tag:"Denied", kind:"fail",
+       text:"The policy engine fails closed. Depending on configured policy the request is denied or escalated, and uncertainty is never treated as permission.",
+       ctl:"<b>Outcome:</b> DENIED. The system does not treat uncertainty as permission.",
+       log:["policy", "decision=DENY rules=ambiguous-target,agent-unavailable"]},
+      {t:"Approval cannot bypass policy", s:"A human approval does not override a denial.", st:"BLOCKED", tag:"Blocked", kind:"fail",
+       text:"A person cannot approve around a policy denial. The request stays blocked unless a new, valid request is made through the permitted workflow.",
+       ctl:"<b>Control:</b> policy has the final word.",
+       log:["approval", "attempt=refused reason=policy-denied"]},
+      {t:"Execution skipped", s:"No directory change, endpoint action or restart.", st:"NOT RUN", tag:"Not executed", kind:"skip",
+       text:"Nothing runs: no directory change, no endpoint action and no VDI restart.",
+       ctl:"<b>Outcome:</b> no side effect.",
+       log:["execute", "skipped side_effects=none"]},
+      {t:"Denial recorded", s:"Reason in the audit trail, secrets never logged.", st:"AUDITED", tag:"Audited", kind:"fail",
+       text:"The denial and its reason are recorded: who asked, what was asked, and why it was refused. No secret is written to the event.",
+       ctl:"<b>Outcome:</b> an auditable denial. The audit trail explains why nothing ran.",
+       log:["audit", "state=DENIED reason=recorded secrets=redacted"]}
+    ]
+  }
+};
+const ORDER = ["ad", "intune", "vdi", "unsafe"];
+let key = "ad", cur = 0, timer = null;
+const initial = (location.hash || "").slice(1);
+if (SC[initial]) key = initial;
+
+function buildTabs() {
+  $("tabs").innerHTML = ORDER.map(k => `<button type="button" role="tab" class="tab${SC[k].unsafe ? " unsafe" : ""}" id="tab-${k}" data-k="${k}" aria-selected="${k === key}"><b>${esc(SC[k].tab)}</b><small>${esc(SC[k].sub)}</small></button>`).join("");
+  $("tabs").querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { key = b.dataset.k; stop(); cur = 0; buildTabs(); buildScenario(); }));
+}
+function buildScenario() {
+  const s = SC[key];
+  $("scope").className = "scope" + (s.unsafe ? " unsafe" : "");
+  $("scope").innerHTML = `<span class="lbl">${s.unsafe ? "Triggers" : "Scope"}</span><ul>${s.scope.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+  $("pipeline").innerHTML = s.stages.map((g, i) => `<li class="stage" data-i="${i}"><span class="dot">${String(i + 1).padStart(2, "0")}</span>
+    <button type="button" class="stage-btn" data-i="${i}"><strong>${esc(g.t)} <span class="state">${esc(g.st)}</span></strong><small>${esc(g.s)}</small></button></li>`).join("");
+  $("pipeline").querySelectorAll(".stage-btn").forEach(b => b.addEventListener("click", () => { stop(); cur = Number(b.dataset.i) + 1; render(); }));
+  $("rule").innerHTML = s.rule;
+  $("rule").className = "rule" + (s.unsafe ? " unsafe" : "");
+  $("progressBar").className = "progress" + (s.unsafe ? " unsafe" : "");
+  render();
+}
+function render() {
+  const s = SC[key];
+  document.querySelectorAll(".stage").forEach((el, i) => {
+    const g = s.stages[i], finished = i < cur - 1, active = i === cur - 1;
+    el.className = "stage";
+    if (active) el.classList.add(g.kind === "fail" ? "fail" : "active");
+    else if (finished) el.classList.add(g.kind === "fail" ? "fail" : g.kind === "skip" ? "skip" : g.kind === "wait" ? "wait" : "done");
+    if (finished && g.kind === "skip") el.classList.add("fail");
+    if (active && g.kind === "skip") el.classList.add("skip");
+    el.querySelector(".stage-btn").setAttribute("aria-current", active ? "step" : "false");
+  });
+  $("progress").style.width = (cur / 6 * 100) + "%";
+  $("status").textContent = cur === 0 ? "Ready · step 0 of 6" : cur === 6 ? "Complete · step 6 of 6" : `Step ${cur} of 6`;
+  const tag = $("tag");
+  if (cur === 0) {
+    tag.className = "tag"; tag.textContent = "Ready";
+    $("dTitle").textContent = s.tab + " · " + s.sub;
+    $("dText").textContent = "Press Play workflow to watch the sequence, or Step to inspect each control.";
+    $("dControl").innerHTML = s.rule;
+  } else {
+    const g = s.stages[cur - 1];
+    tag.className = "tag" + (g.kind === "fail" || g.kind === "skip" ? " fail" : g.kind === "wait" ? " wait" : cur === 6 ? " ok" : "");
+    tag.textContent = g.tag;
+    $("dTitle").textContent = g.t;
+    $("dText").textContent = g.text;
+    $("dControl").innerHTML = g.ctl;
+  }
+  const lines = s.stages.slice(0, cur).map((g, i) => {
+    const cls = g.kind === "fail" || g.kind === "skip" ? "bad" : g.kind === "wait" ? "wait" : i === 5 ? "ok" : "acc";
+    return `<div class="row"><span class="k">${String(i + 1).padStart(2, "0")} ${esc(g.log[0].padEnd(8))}</span> <span class="${cls}">${esc(g.st)}</span> ${esc(g.log[1])}</div>`;
+  });
+  $("record").innerHTML = lines.length ? lines.join("") : `<div class="row k">no events yet · press Play or Step</div>`;
+}
+function stop() { if (timer) { clearInterval(timer); timer = null; } $("play").textContent = "▶ Play workflow"; }
+function advance() { if (cur < 6) { cur++; render(); } if (cur >= 6) stop(); }
+$("play").addEventListener("click", () => {
+  if (timer) { stop(); return; }
+  if (cur >= 6) cur = 0;
+  advance(); $("play").textContent = "❚❚ Pause";
+  timer = setInterval(advance, 2200);
+});
+$("step").addEventListener("click", () => { stop(); if (cur >= 6) cur = 0; advance(); });
+$("reset").addEventListener("click", () => { stop(); cur = 0; render(); });
+buildTabs(); buildScenario();
+</script>
+</body>
+</html>
